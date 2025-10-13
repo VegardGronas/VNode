@@ -6,6 +6,7 @@ A node system for Unity.
 - **Hold Left Mouse**: Drag nodes or connect ports.  
 - **Delete**: Remove selected node(s).  
 - **Right Mouse / Context Menu**: Open node context menu.
+- **Middle Mouse**: Panning.
 
 ## Upcoming Updates
 - New node types  
