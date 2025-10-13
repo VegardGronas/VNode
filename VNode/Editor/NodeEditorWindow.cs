@@ -15,9 +15,13 @@ namespace VNode
         private Node selectedNode;
         private bool leftControlPressed = false;
         private bool isDragging = false;
+        private bool middleClickPressed = false;
+        private Vector2 mousePositionInCanvas;
         private Vector2 mousePosition;
         private Vector2 dragOffset;
-
+        private Vector2 scrollPos;
+        private float panningSpeed = .5f;
+        
         public static void Open(NodeCollector collector)
         {
             NodeEditorWindow window = GetWindow<NodeEditorWindow>("VNode Editor");
@@ -27,36 +31,54 @@ namespace VNode
 
         private void OnGUI()
         {
+            DrawGrid();
+
             if (nodeCollector == null)
             {
                 EditorGUILayout.HelpBox("No NodeCollector assigned!", MessageType.Warning);
                 return;
             }
 
-            if (GUILayout.Button("Test run the nodes", GUILayout.Width(100)))
-            {
+            // --- Toolbar ---
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            if (GUILayout.Button("Run nodes", EditorStyles.toolbarButton))
                 nodeCollector.Run();
-            }
 
-            if(GUILayout.Button("Clean node positions"))
-            {
+            if (GUILayout.Button("Clean node positions", EditorStyles.toolbarButton))
                 CleanNodePositions();
-            }
+            EditorGUILayout.EndHorizontal();
 
+            // --- Scrollable node canvas ---
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, true, true);
+
+            // Reserve layout space
+            Rect canvasRect = GUILayoutUtility.GetRect(4000, 4000);
+
+            // Draw background
+            EditorGUI.DrawRect(canvasRect, NodeStyling.backgroundColor * 0.5f);
+
+            // Adjust mouse position to canvas space
             Event e = Event.current;
+            mousePositionInCanvas = e.mousePosition + scrollPos; // Keep this
             mousePosition = e.mousePosition;
 
             ProcessEvents(e);
 
-            DrawGrid();
-
+            // Draw nodes directly
             foreach (Node node in nodeCollector.nodes)
+                node.DrawNode(scrollPos);
+
+            if(middleClickPressed)
             {
-                node.DrawNode();
+                Pan(e);
             }
 
-            if (selectedPort != null && isDragging) DragNodePortConnection(e);
-            else if (selectedNode != null && isDragging) DragNode(e);
+            if (selectedPort != null && isDragging)
+                DragNodePortConnection(e);
+            else if (selectedNode != null && isDragging)
+                DragNode(e);
+
+            EditorGUILayout.EndScrollView();
 
             Repaint();
         }
@@ -68,13 +90,17 @@ namespace VNode
                 case EventType.MouseDown:
                     if (e.button == 0)
                         LeftMouseDown(e);
+                    else if (e.button == 2) // Middle click
+                        OnMiddleMouseDown(e);
                     break;
 
                 case EventType.MouseUp:
                     if (e.button == 0)
                         LeftMouseUp(e);
+                    else if (e.button == 2) // Middle click
+                        OnMiddleMouseUp(e);
                     break;
-
+                
                 case EventType.ContextClick:
                     RightMouseDown(e);
                     break;
@@ -104,6 +130,11 @@ namespace VNode
         private void RightMouseDown(Event e)
         {
             OpenContextMenu();
+        }
+
+        private void Pan(Event e)
+        {
+            scrollPos -= e.delta * panningSpeed;
         }
 
         private void OpenContextMenu()
@@ -157,8 +188,19 @@ namespace VNode
             isDragging = true;
         }
 
+        private void OnMiddleMouseDown(Event e)
+        {
+            middleClickPressed = true;
+        }
+        
+        private void OnMiddleMouseUp(Event e)
+        {
+            middleClickPressed = false;
+        }
+
         private void LeftMouseDown(Event e)
         {
+            if(selectedNode != null) selectedNode.IsSelected = false;
             selectedPort = null;
             selectedNode = null;
 
@@ -168,7 +210,8 @@ namespace VNode
                 selectedNode = GetNodeIfPointerInside();
                 if(selectedNode != null)
                 {
-                    dragOffset = mousePosition - selectedNode.nodeTransform.Position;
+                    dragOffset = mousePositionInCanvas - selectedNode.nodeTransform.Position;
+                    selectedNode.IsSelected = true;
                 }
             }
         }
@@ -188,13 +231,13 @@ namespace VNode
 
         private void DragNode(Event e)
         {
-            selectedNode.nodeTransform.Position = GetSnappedPosition(mousePosition - dragOffset);
+            selectedNode.nodeTransform.Position = GetSnappedPosition(mousePositionInCanvas - dragOffset);
             GUI.changed = true;
         }
 
         private void DragNodePortConnection(Event e)
         {
-            selectedPort.DrawConnectionLineWhenDragging(mousePosition);
+            selectedPort.DrawConnectionLineWhenDragging(e.mousePosition);
             GUI.changed = true;
         }
 
@@ -219,7 +262,7 @@ namespace VNode
             {
                 foreach (NodePort port in node.ports.Values)
                 {
-                    if (port.IsPointerInside(mousePosition))
+                    if (port.IsPointerInside(mousePositionInCanvas))
                     {
                         Debug.Log("Clicked node port");
                         return port;
@@ -233,18 +276,15 @@ namespace VNode
         {
             foreach(Node node in nodeCollector.nodes)
             {
-                if(node.nodeTransform.IsPointerInside(mousePosition))   
+                if(node.nodeTransform.IsPointerInside(mousePositionInCanvas))   
                     return node;
             }
 
             return null;
         }
 
-        private void DrawGrid(float gridSpacing = 20f, float gridOpacity = 0.2f, Color gridColor = default)
+        private void DrawGrid(float gridSpacing = 20f)
         {
-            if (gridColor == default)
-                gridColor = Color.gray;
-
             int width = (int)EditorGUIUtility.currentViewWidth;
             int height = (int)EditorGUIUtility.singleLineHeight * 50; // Fallback height
 
@@ -253,7 +293,7 @@ namespace VNode
 
             // Use Handles for performance and crisp lines
             Handles.BeginGUI();
-            Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
+            Handles.color = NodeStyling.gridColor;
 
             // Vertical lines
             for (float x = 0; x < viewRect.width; x += gridSpacing)

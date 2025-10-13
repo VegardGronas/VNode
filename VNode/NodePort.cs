@@ -16,6 +16,7 @@ namespace VNode
         public Node OwnerNode { get; }
         public string Name { get; }
         public Vector2 Position { get; set; } = Vector2.zero;
+        public Vector2 PositionInCanvas { get; set; } = Vector2.zero;
         
         public List<NodePort> connections = new();
         public bool ShowProperty { get; set; } = true;
@@ -53,7 +54,7 @@ namespace VNode
 
         public bool IsPointerInside(Vector2 mousePosInCanvas) 
         {
-            return Vector2.Distance(Position, mousePosInCanvas) < OwnerNode.attributes.portRadius;
+            return Vector2.Distance(PositionInCanvas, mousePosInCanvas) < OwnerNode.attributes.portRadius;
         }
 
         public virtual object GetValue() => null;
@@ -76,7 +77,7 @@ namespace VNode
                         endPos,
                         startPos + Vector3.right * 50f,
                         endPos + Vector3.left * 50f,
-                        Color.white,
+                        NodeStyling.outputPortColor,
                         null,
                         3f
                     );
@@ -96,7 +97,7 @@ namespace VNode
                 endPos,
                 startPos + Vector3.right * 50f,
                 endPos + Vector3.left * 50f,
-                Color.white,
+                NodeStyling.outputPortColor,
                 null,
                 3f
             );
