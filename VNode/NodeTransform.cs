@@ -8,7 +8,7 @@ namespace VNode
         public Vector2 Size { get; set; }
 
         public Vector2 PositionLocal => Position; // for now same as canvas
-        public Vector2 PositionCanvas => Position; // can add parent offsets later
+        public Vector2 PositionCanvas { get; set; } // can add parent offsets later
 
         public Rect Rect => new Rect(Position, Size);
 
@@ -24,6 +24,13 @@ namespace VNode
         // Helper: convert canvas position to local
         public Vector2 CanvasToLocal(Vector2 canvasPos) => canvasPos - Position;
 
-        public bool IsPointerInside(Vector2 mousePos) => Rect.Contains(mousePos);
+        public bool IsPointerInside(Vector2 mousePos)
+        {
+            // Define the node rectangle in canvas space
+            Rect nodeRect = new Rect(PositionCanvas, Size);
+
+            // Return true if the mouse is inside this rectangle
+            return nodeRect.Contains(mousePos);
+        }
     }
 }

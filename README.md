@@ -13,3 +13,6 @@ A node system for Unity.
 - Improved styling  
 - Multi-selection support  
 - Categorized context menu
+
+## Changelog
+See [ChangeLogV1.txt](ChangeLogV1.txt) for full version history.

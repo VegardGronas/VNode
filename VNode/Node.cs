@@ -9,8 +9,9 @@ namespace VNode
     {
         public Attributes attributes = new();
         public Dictionary<string, NodePort> ports = new();
-        public NodeTransform nodeTransform = new(Vector2.zero, new(200, 100));
+        public NodeTransform nodeTransform = new(new(200, 200), new(200, 100));
         [HideInInspector] public bool hasInitialized = false;
+        public bool IsSelected { get; set; } = false;
 
         public void Initialize(bool force = false) { if (hasInitialized && !force) return; ports.Clear(); OnInitialize(); hasInitialized = true; }
         
@@ -58,7 +59,7 @@ namespace VNode
             }
         }
 
-        public void DrawNode()
+        public void DrawNode(Vector2 scrollPos)
         {
             float portStartGap = 30f;
             float portGap = 25f;
@@ -67,13 +68,25 @@ namespace VNode
 
             Handles.BeginGUI();
 
-            // Draw the node background as a box at the node's position
+            // Node rect
             Rect nodeRect = nodeTransform.Rect;
+            nodeTransform.PositionCanvas = nodeTransform.Position + scrollPos;
+
+            // Determine node color
+            Color nodeColor = NodeStyling.defaultColor;
+            if (IsSelected) // Optional: highlight selected node
+                nodeColor = NodeStyling.selectedColor;
+
+            // Draw colored background
+            EditorGUI.DrawRect(nodeRect, nodeColor);
+
+            // Draw border overlay
             GUI.Box(nodeRect, "", EditorStyles.helpBox);
 
+            // Draw header
             DrawNodeHeader(nodeRect);
 
-            // Draw input ports on the left
+            // Draw input ports
             for (int i = 0; i < GetPorts(NodePort.IO.Input).Count; i++)
             {
                 NodePort port = GetPorts(NodePort.IO.Input)[i];
@@ -81,36 +94,25 @@ namespace VNode
                 Vector2 pos = nodeRect.position;
                 pos.y += portStartGap + portGap * i;
                 pos.x += portPadding;
-                
-                // Store absolute canvas position for hit detection
+
                 port.Position = pos;
-
-                // Draw the port disc
-                DrawPortDisc(port);
-
-                // Draw the value (if editable)
-                DrawPortValueAt(port, new(port.Position.x + 10, port.Position.y - valueLift));
+                DrawPortDisc(port, scrollPos);
+                DrawPortValueAt(port, new Vector2(port.Position.x + 10, port.Position.y - valueLift));
             }
 
-            // Draw output ports on the right
+            // Draw output ports
             for (int i = 0; i < GetPorts(NodePort.IO.Output).Count; i++)
             {
                 NodePort port = GetPorts(NodePort.IO.Output)[i];
-               
+
                 Vector2 pos = nodeRect.position;
                 pos.x += nodeRect.width - portPadding;
                 pos.y += portStartGap + portGap * i;
 
-                // Store absolute canvas position for hit detection
                 port.Position = pos;
-
-                // Draw the port disc
-                DrawPortDisc(port);
-
+                DrawPortDisc(port, scrollPos);
                 port.DrawConnectionLine();
-
-                // Draw the value (if editable)
-                DrawPortValueAt(port, new(port.Position.x - 65f, port.Position.y - valueLift));
+                DrawPortValueAt(port, new Vector2(port.Position.x - 65f, port.Position.y - valueLift));
             }
 
             Handles.EndGUI();
@@ -134,10 +136,11 @@ namespace VNode
             GUI.Label(headerRect, GetType().ToString() ?? "Node", labelStyle);
         }
 
-        private void DrawPortDisc(NodePort port)
+        private void DrawPortDisc(NodePort port, Vector2 scrollPos)
         {
-            Handles.color = (port.PortType == NodePort.IO.Input) ? Color.cyan : Color.magenta;
+            Handles.color = (port.PortType == NodePort.IO.Input) ? NodeStyling.inputPortColor : NodeStyling.outputPortColor;
             Handles.DrawSolidDisc(port.Position, Vector3.forward, attributes.portRadius);
+            port.PositionInCanvas = port.Position + scrollPos;
         }
 
         // Draw port value at a given absolute position
