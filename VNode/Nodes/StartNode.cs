@@ -6,9 +6,8 @@ namespace VNode
 {
     public class StartNode : Node
     {
-        public override void Initialize()
+        protected override void OnInitialize()
         {
-            base.Initialize();
             NodePort outPort = new(this, "Start", NodePort.IO.Output, null);
             ports.Add(outPort.Name, outPort);
 

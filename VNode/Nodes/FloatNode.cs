@@ -4,7 +4,7 @@ namespace VNode
 {
     public class FloatNode : Node
     {
-        public override void Initialize()
+        protected override void OnInitialize()
         {
             NodePort<float> outPut = new(this, "Value", NodePort.IO.Output);
             ports.Add("OutExecute", outPut);

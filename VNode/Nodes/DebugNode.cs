@@ -5,9 +5,8 @@ namespace VNode
 {
     public class DebugNode : Node
     {
-        public override void Initialize()
+        protected override void OnInitialize()
         {
-            base.Initialize();
             NodePort inPort = new(this, "Input", NodePort.IO.Input, null);
             NodePort outPort = new(this, "Output", NodePort.IO.Output, null);
             ports.Add("Input", inPort);

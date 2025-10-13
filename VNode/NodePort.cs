@@ -42,6 +42,15 @@ namespace VNode
             other.OwnerNode.NewPortConnection(this);
         }
 
+        public virtual void Disconnect(NodePort other)
+        {
+            if (connections.Contains(other))
+            {
+                connections.Remove(other);
+                other.connections.Remove(this);
+            }
+        }
+
         public bool IsPointerInside(Vector2 mousePosInCanvas) 
         {
             return Vector2.Distance(Position, mousePosInCanvas) < OwnerNode.attributes.portRadius;

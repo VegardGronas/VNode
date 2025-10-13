@@ -11,7 +11,7 @@ namespace VNode
         private void OnEnable()
         {
             collector = (NodeCollector)target;
-            collector.Initialize();
+            if(!collector.hasInitialized) collector.Initialize();
         }
 
         public override void OnInspectorGUI()
@@ -32,6 +32,10 @@ namespace VNode
             {
                 collector.nodes.Clear();
                 collector.UpdateList();
+                foreach (Node node in collector.nodes)
+                {
+                    node.Initialize(true);
+                }
             }
         }
     }

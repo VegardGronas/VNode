@@ -1,4 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -71,14 +75,23 @@ namespace VNode
                         LeftMouseUp(e);
                     break;
 
+                case EventType.ContextClick:
+                    RightMouseDown(e);
+                    break;
+
                 case EventType.MouseDrag:
                     if (e.button == 0)
                         MouseDrag(e);
                     break;
-
                 case EventType.KeyDown:
                     if (e.keyCode == KeyCode.LeftControl)
                         leftControlPressed = true;
+
+                    if (e.keyCode == KeyCode.Delete)
+                    {
+                        if (selectedNode != null) nodeCollector.DeleteNode(selectedNode);
+                        selectedNode = null;
+                    }
                     break;
 
                 case EventType.KeyUp:
@@ -86,6 +99,57 @@ namespace VNode
                         leftControlPressed = false;
                     break;
             }
+        }
+
+        private void RightMouseDown(Event e)
+        {
+            OpenContextMenu();
+        }
+
+        private void OpenContextMenu()
+        {
+            GenericMenu menu = new GenericMenu();
+
+            var nodeTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a =>
+                {
+                    try { return a.GetTypes(); }
+                    catch (ReflectionTypeLoadException e) { return e.Types.Where(t => t != null); }
+                })
+                .Where(t => typeof(Node).IsAssignableFrom(t) && !t.IsAbstract)
+                .ToList();
+
+            if (nodeTypes.Count == 0)
+            {
+                menu.AddDisabledItem(new GUIContent("No node types found"));
+            }
+            else
+            {
+                foreach (var type in nodeTypes)
+                {
+                    string name = ObjectNames.NicifyVariableName(type.Name);
+                    menu.AddItem(new GUIContent(name), false, () => CreateNode(type, mousePosition));
+                }
+            }
+
+            menu.ShowAsContext();
+        }
+
+        private void CreateNode(Type nodeType, Vector2 position)
+        {
+            if (nodeCollector == null)
+            {
+                Debug.LogError("No NodeCollector found — cannot create node!");
+                return;
+            }
+
+            // Create the node as a MonoBehaviour component
+            Node newNode = (Node)nodeCollector.gameObject.AddComponent(nodeType);
+            newNode.nodeTransform.Position = position;
+
+            nodeCollector.UpdateList();
+
+            Debug.Log($"Created node of type {nodeType.Name} at {position}");
         }
 
         private void MouseDrag(Event e)

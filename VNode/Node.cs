@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,9 +10,12 @@ namespace VNode
         public Attributes attributes = new();
         public Dictionary<string, NodePort> ports = new();
         public NodeTransform nodeTransform = new(Vector2.zero, new(200, 100));
+        [HideInInspector] public bool hasInitialized = false;
 
-        public virtual void Initialize() { ports.Clear(); }
+        public void Initialize(bool force = false) { if (hasInitialized && !force) return; ports.Clear(); OnInitialize(); hasInitialized = true; }
         
+        protected virtual void OnInitialize() { }
+
         public virtual void Execute(HashSet<Node> visited) { }
 
         public void TriggerNext(NodePort port, HashSet<Node> visited = null)
@@ -40,6 +44,18 @@ namespace VNode
             }
 
             return result;
+        }
+
+        public void RemoveConnections()
+        {
+            foreach (NodePort port in ports.Values)
+            {
+                // Make a copy of the list since Disconnect modifies it
+                foreach (var conn in port.connections.ToList())
+                {
+                    port.Disconnect(conn);
+                }
+            }
         }
 
         public void DrawNode()

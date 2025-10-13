@@ -7,29 +7,34 @@ namespace VNode
     public class NodeCollector : MonoBehaviour
     {
         public List<Node> nodes = new();
+        [HideInInspector] public bool hasInitialized = false;
 
         public void Initialize()
         {
             nodes.Clear();
             Node[] childNodes = GetComponentsInChildren<Node>();
             nodes.AddRange(childNodes);
+            hasInitialized = true;
         }
 
         public void UpdateList()
         {
-            List<Node> updatedList = new();
-            foreach (Node node in nodes)
-            {
-                if (node == null) continue;
-                updatedList.Add(node);
-            }
             Node[] childNodes = GetComponentsInChildren<Node>();
-            foreach (Node node in childNodes)
+           
+            foreach(Node node in childNodes)
             {
-                if (updatedList.Contains(node)) continue;
-                updatedList.Add(node);
+                if(!nodes.Contains(node)) nodes.Add(node);  
             }
-            nodes = updatedList;
+        }
+
+        public void DeleteNode(Node node)
+        {
+            if (nodes.Contains(node))
+            {
+                node.RemoveConnections();
+                nodes.Remove(node);
+                DestroyImmediate(node);
+            }
         }
 
         public void Run()

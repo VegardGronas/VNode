@@ -6,9 +6,8 @@ namespace VNode
 {
     public class AdditionNode : Node
     {
-        public override void Initialize()
+        protected override void OnInitialize()
         {
-            base.Initialize();
             NodePort<float> outputPort = new(this, "Execute", NodePort.IO.Output);
             NodePort inputPort = new(this, "Input", NodePort.IO.Input, null);
             NodePort<float> inputValue1 = new(this, "Value 1", NodePort.IO.Input);
