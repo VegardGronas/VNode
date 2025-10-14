@@ -37,6 +37,16 @@ namespace VNode
             }
         }
 
+        public void ResetGraph()
+        {
+            nodes.Clear();
+            UpdateList();
+            foreach (Node node in nodes)
+            {
+                node.Initialize(true);
+            }
+        }
+
         public void Run()
         {
             foreach (Node node in nodes)

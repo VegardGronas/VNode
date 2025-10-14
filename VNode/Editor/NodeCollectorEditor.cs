@@ -30,12 +30,7 @@ namespace VNode
 
             if(GUILayout.Button("Reset graph"))
             {
-                collector.nodes.Clear();
-                collector.UpdateList();
-                foreach (Node node in collector.nodes)
-                {
-                    node.Initialize(true);
-                }
+                collector.ResetGraph();
             }
         }
     }

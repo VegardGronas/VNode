@@ -1,72 +1,81 @@
-VNode Changelog
-[v0.1] – Initial Alpha
+# VNode Changelog
 
-Date: 2025-10-13
+## [v0.1] – Initial Alpha
 
-Added
+**Date:** 2025-10-14
 
-Base Node and NodePort classes with generic value support.
+### Added
+- Introduced `NodeInputManager`: an event-driven input system for the editor window.
 
-NodeTransform for canvas-positioned nodes.
+### Changed
+- Split the main `NodeEditorWindow` class into multiple partial classes for better organization and readability.
 
-NodeCollector to hold and manage nodes.
+**Date:** 2025-10-13
 
-Basic editor window (VNodeWindow and NodeEditorWindow) with:
+### Added
 
-Node creation via context menu.
+- Base Node and NodePort classes with generic value support.
 
-Dragging nodes with left mouse.
+- NodeTransform for canvas-positioned nodes.
 
-Connecting nodes through ports.
+- NodeCollector to hold and manage nodes.
 
-Scrollable node canvas.
+- Basic editor window (VNodeWindow and NodeEditorWindow) with:
 
-Node selection and deletion.
+- Node creation via context menu.
 
-Basic input/output port drawing and value fields.
+- Dragging nodes with left mouse.
 
-Grid background for node canvas.
+- Connecting nodes through ports.
 
-ReadMe viewer integrated into editor window.
+- Scrollable node canvas.
 
-NodeStyling class to define colors for nodes, ports, grid, and background.
+- Node selection and deletion.
 
-Changed
+- Basic input/output port drawing and value fields.
 
-Replaced hard-coded colors with configurable NodeStyling colors.
+- Grid background for node canvas.
 
-Port and node positions now use canvas space, supporting scrolling and panning.
+- ReadMe viewer integrated into editor window.
 
-Connection lines use Bezier curves.
+- NodeStyling class to define colors for nodes, ports, grid, and background.
 
-Scroll view integrated into editor window for large node canvases.
+### Changed
 
-Fixed
+- Replaced hard-coded colors with configurable NodeStyling colors.
 
-Node selection and dragging now respect canvas scrolling.
+- Port and node positions now use canvas space, supporting scrolling and panning.
 
-Port hit detection corrected for canvas coordinates.
+- Connection lines use Bezier curves.
 
-Added generic method to create nodes dynamically from any Node subclass.
+- Scroll view integrated into editor window for large node canvases.
 
-Known Issues
+### Fixed
 
-Connection lines drawn with Handles instead of GUI may not perfectly clip within scroll view.
+- Node selection and dragging now respect canvas scrolling.
 
-Multi-selection not yet implemented.
+- Port hit detection corrected for canvas coordinates.
 
-Node saving/loading not yet implemented.
+- Added generic method to create nodes dynamically from any Node subclass.
 
-Context menu does not categorize node types yet.
+### Known Issues
 
-When dragging node that has a port, the port feels choppy moved.
+- Connection lines drawn with Handles instead of GUI may not perfectly clip within scroll view.
 
-Upcoming Features
+- Multi-selection not yet implemented.
 
-Node serialization: positions, connections, and values.
+- Node saving/loading not yet implemented.
 
-Categorized context menu.
+- Context menu does not categorize node types yet.
 
-Multi-selection support.
+- When dragging node that has a port, the port feels choppy moved.
 
-Node styling presets and theming.
+- Upcoming Features
+
+- Node serialization: positions, connections, and values.
+
+- Categorized context menu.
+
+- Multi-selection support.
+
+- Node styling presets and theming.
