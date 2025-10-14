@@ -3,15 +3,15 @@ using UnityEditor;
 
 namespace VNode
 {
-    [CustomEditor(typeof(NodeCollector))]
-    public class NodeCollectorEditor : Editor
+    [CustomEditor(typeof(NodeManager))]
+    public class NodeManagerEditor : Editor
     {
-        private NodeCollector collector;
+        private NodeManager nodeManager;
 
         private void OnEnable()
         {
-            collector = (NodeCollector)target;
-            if(!collector.hasInitialized) collector.Initialize();
+            nodeManager = (NodeManager)target;
+            if(!nodeManager.hasInitialized) nodeManager.Initialize();
         }
 
         public override void OnInspectorGUI()
@@ -20,17 +20,17 @@ namespace VNode
 
             if(GUILayout.Button("Update Node List"))
             {
-                collector.UpdateList();
+                nodeManager.UpdateList();
             }
         
             if(GUILayout.Button("Open Editor"))
             {
-                NodeEditorWindow.Open(collector);
+                NodeEditorWindow.Open(nodeManager);
             }
 
             if(GUILayout.Button("Reset graph"))
             {
-                collector.ResetGraph();
+                nodeManager.ResetGraph();
             }
         }
     }

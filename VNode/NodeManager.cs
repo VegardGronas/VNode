@@ -4,7 +4,7 @@ using UnityEngine;
 namespace VNode
 {
     [RequireComponent (typeof (StartNode))]
-    public class NodeCollector : MonoBehaviour
+    public class NodeManager : MonoBehaviour
     {
         public List<Node> nodes = new();
         [HideInInspector] public bool hasInitialized = false;

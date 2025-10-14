@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -7,6 +8,7 @@ namespace VNode
 {
     public class Node : MonoBehaviour
     {
+        public string ID { get; } = Guid.NewGuid().ToString();
         public Attributes attributes = new();
         public Dictionary<string, NodePort> ports = new();
         public NodeTransform nodeTransform = new(new(200, 200), new(200, 100));

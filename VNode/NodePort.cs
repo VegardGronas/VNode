@@ -10,6 +10,7 @@ namespace VNode
 {
     public class NodePort
     {
+        public string ID { get; } = Guid.NewGuid().ToString();
         public enum IO { Input, Output }
         public IO PortType { get; }
         public Type ValueType { get; }

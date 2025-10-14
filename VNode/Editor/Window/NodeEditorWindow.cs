@@ -5,7 +5,7 @@ namespace VNode
 {
     public partial class NodeEditorWindow : EditorWindow
     {
-        private NodeCollector nodeCollector;
+        private NodeManager nodeCollector;
         private NodePort selectedPort;
         private Node selectedNode;
         private Vector2 mousePositionInCanvas;
@@ -16,7 +16,7 @@ namespace VNode
         private NodeInputManager input;
         private NodeContextMenu contextMenu;
 
-        public static void Open(NodeCollector collector)
+        public static void Open(NodeManager collector)
         {
             NodeEditorWindow window = GetWindow<NodeEditorWindow>("VNode Editor");
             window.nodeCollector = collector;

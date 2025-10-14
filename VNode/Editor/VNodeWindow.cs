@@ -37,9 +37,9 @@ namespace VNode
             if (GUILayout.Button("Create VNode Graph"))
             {
                 GameObject nodeObject = new("VNode Graph");
-                nodeObject.AddComponent<NodeCollector>();
+                nodeObject.AddComponent<NodeManager>();
                 Selection.activeObject = nodeObject;
-                NodeCollector collector = nodeObject.GetComponent<NodeCollector>();
+                NodeManager collector = nodeObject.GetComponent<NodeManager>();
                 NodeEditorWindow.Open(collector);
             }
 
