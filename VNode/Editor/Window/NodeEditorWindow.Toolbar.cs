@@ -1,5 +1,7 @@
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace VNode
 {
@@ -7,7 +9,7 @@ namespace VNode
     {
         private void DrawToolbar()
         {
-            if (nodeCollector == null)
+            if (nodeManager == null)
             {
                 EditorGUILayout.HelpBox("No NodeCollector assigned!", MessageType.Warning);
                 return;
@@ -16,9 +18,7 @@ namespace VNode
             // --- Toolbar ---
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             if (GUILayout.Button("Run nodes", EditorStyles.toolbarButton))
-                nodeCollector.Run();
-            if (GUILayout.Button("Reset Graph", EditorStyles.toolbarButton))
-                nodeCollector.ResetGraph();
+                nodeManager.Run();
             if (GUILayout.Button("Clean node positions", EditorStyles.toolbarButton))
                 CleanNodePositions();
             EditorGUILayout.EndHorizontal();
@@ -42,16 +42,45 @@ namespace VNode
 
             input.Update(e);
 
-            // Draw nodes directly
-            foreach (Node node in nodeCollector.nodes)
-                node.DrawNode(scrollPos);
+            DrawPortConnections();
 
-            if(selectedPort != null && input.dragInputAction.IsDragging)
+            foreach (Node node in NodeRegistry.Nodes.Values)
+            {
+                node.DrawNode(scrollPos);
+            }
+
+            if (selectedPort != null && input.dragInputAction.IsDragging)
             {
                 DragNodePortConnection(input.dragInputAction.DragValues.position);
             }
 
             EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawPortConnections()
+        {
+            foreach (NodeConnection connection in NodeRegistry.Connections)
+            {
+                NodePort fromPort = NodeRegistry.GetPort(connection.FromPortID);
+                NodePort toPort = NodeRegistry.GetPort(connection.ToPortID);
+
+                Handles.BeginGUI();
+
+                Vector3 startPos = new(fromPort.Position.x, fromPort.Position.y, 0);
+                Vector3 endPos = new(toPort.Position.x, toPort.Position.y, 0);
+
+                Handles.DrawBezier(
+                    startPos,
+                    endPos,
+                    startPos + Vector3.right * 50f,
+                    endPos + Vector3.left * 50f,
+                    NodeStyling.outputPortColor,
+                    null,
+                    3f
+                );
+
+                Handles.EndGUI();
+            }
         }
 
         private void DrawGrid(float gridSpacing = 20f)

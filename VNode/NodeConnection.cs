@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace VNode
 {
+    [Serializable]
     public class NodeConnection
     {
         public string FromNodeID { get; }

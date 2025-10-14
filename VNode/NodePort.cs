@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace VNode
 {
+    [Serializable]
     public class NodePort
     {
         public string ID { get; } = Guid.NewGuid().ToString();
@@ -18,8 +19,6 @@ namespace VNode
         public string Name { get; }
         public Vector2 Position { get; set; } = Vector2.zero;
         public Vector2 PositionInCanvas { get; set; } = Vector2.zero;
-        
-        public List<NodePort> connections = new();
         public bool ShowProperty { get; set; } = true;
 
         public NodePort(Node ownerNode, string name, IO portType, Type valueType)
@@ -32,30 +31,17 @@ namespace VNode
 
         public virtual void Connect(NodePort other)
         {
-            if(connections.Contains(other))
-            {
-                Debug.Log("Already connected");
-                return;
-            }
-            connections.Add(other);
-            other.connections.Add(this);
-
-            OwnerNode.NewPortConnection(other);
-            other.OwnerNode.NewPortConnection(this);
+            
         }
 
         public virtual void Disconnect(NodePort other)
         {
-            if (connections.Contains(other))
-            {
-                connections.Remove(other);
-                other.connections.Remove(this);
-            }
+            
         }
 
         public bool IsPointerInside(Vector2 mousePosInCanvas) 
         {
-            return Vector2.Distance(PositionInCanvas, mousePosInCanvas) < OwnerNode.attributes.portRadius;
+            return Vector2.Distance(Position, mousePosInCanvas) < OwnerNode.attributes.portRadius;
         }
 
         public virtual object GetValue() => null;
@@ -64,26 +50,43 @@ namespace VNode
 
         public virtual void DrawGUIElements() { }
 
-        public void DrawConnectionLine()
+        public void DrawPort(Vector2 position, int index)
         {
-            foreach(NodePort port in connections)
-            {
-                if(port != this)
-                {
-                    Vector3 startPos = new(Position.x, Position.y, 0);
-                    Vector3 endPos = new(port.Position.x, port.Position.y, 0);
+            Handles.BeginGUI();
 
-                    Handles.DrawBezier(
-                        startPos,
-                        endPos,
-                        startPos + Vector3.right * 50f,
-                        endPos + Vector3.left * 50f,
-                        NodeStyling.outputPortColor,
-                        null,
-                        3f
-                    );
-                }
+            Handles.color = (PortType == IO.Output) ? NodeStyling.outputPortColor : NodeStyling.inputPortColor;
+
+            position.y += 25f * index;
+
+            Position = position;
+
+            Handles.DrawSolidDisc(Position, Vector3.forward, OwnerNode.attributes.portRadius);
+
+            DrawPortValueAt(this, position);
+
+            Handles.EndGUI();
+        }
+
+        // Draw port value at a given absolute position
+        private void DrawPortValueAt(NodePort port, Vector2 position)
+        {
+            float xPadding = 10f;
+            float yPadding = -8f;
+
+            if(PortType == IO.Output)
+            {
+                xPadding = -70f;
             }
+
+            if (!port.ShowProperty) return;
+#if UNITY_EDITOR
+            if (port is NodePort<float> fPort)
+                fPort.SetValue(EditorGUI.FloatField(new Rect(position.x + xPadding, position.y + yPadding, 50, 16), (float)fPort.GetValue()));
+            else if (port is NodePort<int> iPort)
+                iPort.SetValue(EditorGUI.IntField(new Rect(position.x + xPadding, position.y + yPadding, 50, 16), (int)iPort.GetValue()));
+            else if (port is NodePort<string> sPort)
+                sPort.SetValue(EditorGUI.TextField(new Rect(position.x + xPadding, position.y + yPadding, 80, 16), (string)sPort.GetValue()));
+#endif
         }
 
         public void DrawConnectionLineWhenDragging(Vector2 mousePos)
@@ -105,6 +108,32 @@ namespace VNode
 
             Handles.EndGUI();
         }
+
+        #region Obsolete
+        [Obsolete("Drawing lines in node editor window")]
+        public void DrawConnectionLine(NodePort toPort)
+        {
+            if (toPort != this)
+            {
+                Handles.BeginGUI();
+
+                Vector3 startPos = new(Position.x, Position.y, 0);
+                Vector3 endPos = new(toPort.Position.x, toPort.Position.y, 0);
+
+                Handles.DrawBezier(
+                    startPos,
+                    endPos,
+                    startPos + Vector3.right * 50f,
+                    endPos + Vector3.left * 50f,
+                    NodeStyling.outputPortColor,
+                    null,
+                    3f
+                );
+
+                Handles.EndGUI();
+            }
+        }
+        #endregion
     }
 
     /// <summary>

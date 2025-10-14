@@ -11,7 +11,6 @@ namespace VNode
         private void OnEnable()
         {
             node = (Node)target;
-            node.Initialize();
         }
 
         public override void OnInspectorGUI()

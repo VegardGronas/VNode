@@ -11,26 +11,26 @@ namespace VNode
         private void OnEnable()
         {
             nodeManager = (NodeManager)target;
-            if(!nodeManager.hasInitialized) nodeManager.Initialize();
+            nodeManager.Initialize();
         }
 
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
 
-            if(GUILayout.Button("Update Node List"))
+            if(GUILayout.Button("Save Registry"))
             {
-                nodeManager.UpdateList();
-            }
-        
-            if(GUILayout.Button("Open Editor"))
-            {
-                NodeEditorWindow.Open(nodeManager);
+                NodeRegistry.SaveRegistry();
             }
 
-            if(GUILayout.Button("Reset graph"))
+            if (GUILayout.Button("Load Registry"))
             {
-                nodeManager.ResetGraph();
+                NodeRegistry.LoadRegistry();
+            }
+
+            if (GUILayout.Button("Open Editor"))
+            {
+                NodeEditorWindow.Open(nodeManager);
             }
         }
     }

@@ -49,7 +49,7 @@ namespace VNode
             Node newNode = (Node)nodeCollector.gameObject.AddComponent(nodeType);
             newNode.nodeTransform.Position = position;
 
-            nodeCollector.UpdateList();
+            newNode.Initialize();
 
             Debug.Log($"Created node of type {nodeType.Name} at {position}");
         }

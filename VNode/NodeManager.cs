@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,59 +7,52 @@ namespace VNode
     [RequireComponent (typeof (StartNode))]
     public class NodeManager : MonoBehaviour
     {
-        public List<Node> nodes = new();
-        [HideInInspector] public bool hasInitialized = false;
-
+        public string ID { get; } = Guid.NewGuid().ToString();
         public void Initialize()
         {
-            nodes.Clear();
-            Node[] childNodes = GetComponentsInChildren<Node>();
-            nodes.AddRange(childNodes);
-            hasInitialized = true;
+            NodeRegistry.NodeManagerInstanceID = ID;
+            Node[] nodes = GetComponentsInChildren<Node>();
+            foreach (Node node in nodes)
+            {
+                if (node is StartNode) return;
+            }
+            CreateStartNode();
+        }
+
+        public void Load()
+        {
+            Node[] nodes = GetComponentsInChildren<Node>();
+            foreach (Node node in nodes)
+            {
+                NodeRegistry.Register(node);
+                node.Initialize();
+            }
+        }
+
+        private void CreateStartNode()
+        {
+            StartNode node = gameObject.AddComponent<StartNode>();
+            node.Initialize();
         }
 
         public void UpdateList()
         {
-            Node[] childNodes = GetComponentsInChildren<Node>();
-           
-            foreach(Node node in childNodes)
-            {
-                if(!nodes.Contains(node)) nodes.Add(node);  
-            }
+            
         }
 
         public void DeleteNode(Node node)
         {
-            if (nodes.Contains(node))
-            {
-                node.RemoveConnections();
-                nodes.Remove(node);
-                DestroyImmediate(node);
-            }
+            
         }
 
         public void ResetGraph()
         {
-            nodes.Clear();
-            UpdateList();
-            foreach (Node node in nodes)
-            {
-                node.Initialize(true);
-            }
+            
         }
 
         public void Run()
         {
-            foreach (Node node in nodes)
-            {
-                if (node is StartNode)
-                {
-                    node.TriggerNext(node.GetPorts(NodePort.IO.Output)[0]);
-                    return;
-                }
-            }
-
-            Debug.LogWarning("Could not find a stat node. Unable to run");
+            
         }
     }
 }
