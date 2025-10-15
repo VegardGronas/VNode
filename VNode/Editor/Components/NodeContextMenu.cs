@@ -8,7 +8,7 @@ namespace VNode
 {
     public class NodeContextMenu
     {
-        public void OpenContextMenu(Vector2 mousePosition, NodeCollector nodeCollector)
+        public void OpenContextMenu(Vector2 mousePosition, NodeManager nodeCollector)
         {
             GenericMenu menu = new GenericMenu();
 
@@ -37,7 +37,7 @@ namespace VNode
             menu.ShowAsContext();
         }
 
-        private void CreateNode(Type nodeType, Vector2 position, NodeCollector nodeCollector)
+        private void CreateNode(Type nodeType, Vector2 position, NodeManager nodeCollector)
         {
             if (nodeCollector == null)
             {
@@ -49,7 +49,7 @@ namespace VNode
             Node newNode = (Node)nodeCollector.gameObject.AddComponent(nodeType);
             newNode.nodeTransform.Position = position;
 
-            nodeCollector.UpdateList();
+            newNode.Initialize();
 
             Debug.Log($"Created node of type {nodeType.Name} at {position}");
         }

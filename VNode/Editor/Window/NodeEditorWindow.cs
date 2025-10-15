@@ -5,7 +5,7 @@ namespace VNode
 {
     public partial class NodeEditorWindow : EditorWindow
     {
-        private NodeCollector nodeCollector;
+        private NodeManager nodeManager;
         private NodePort selectedPort;
         private Node selectedNode;
         private Vector2 mousePositionInCanvas;
@@ -16,10 +16,18 @@ namespace VNode
         private NodeInputManager input;
         private NodeContextMenu contextMenu;
 
-        public static void Open(NodeCollector collector)
+        public static void Open(NodeManager nodeManager)
         {
             NodeEditorWindow window = GetWindow<NodeEditorWindow>("VNode Editor");
-            window.nodeCollector = collector;
+            window.nodeManager = nodeManager;
+
+            Node[] nodes = nodeManager.GetComponents<Node>();
+            foreach (Node node in nodes)
+            {
+                NodeRegistry.Register(node);
+                node.Initialize();
+            }
+
             window.Show();
         }
 
@@ -73,9 +81,13 @@ namespace VNode
                 NodePort otherPort = GetPort();
                 if (otherPort != null)
                 {
-                    selectedPort.Connect(otherPort);
+                    if(selectedPort.PortType != otherPort.PortType)
+                    {
+                        NodeRegistry.AddConnection(new(selectedPort.OwnerNode.ID, selectedPort.ID, otherPort.OwnerNode.ID, otherPort.ID));
+                    }
                 }
             }
+            selectedPort = null;
         }
 
         private void DragNode()
@@ -99,23 +111,21 @@ namespace VNode
 
         private void CleanNodePositions()
         {
-            for(int i = 0; i < nodeCollector.nodes.Count; i++)
+            int i = 0;
+            foreach(Node node in NodeRegistry.Nodes.Values)
             {
-                nodeCollector.nodes[i].nodeTransform.Position = new(100, 100 * (i + 1));
+                node.nodeTransform.Position = new(100, 100 + (100 * i));
+                i++;
             }
         }
 
         private NodePort GetPort()
         {
-            foreach (Node node in nodeCollector.nodes)
+            foreach(NodePort port in NodeRegistry.Ports.Values)
             {
-                foreach (NodePort port in node.ports.Values)
+                if (port.IsPointerInside(mousePosition))
                 {
-                    if (port.IsPointerInside(mousePositionInCanvas))
-                    {
-                        Debug.Log("Clicked node port");
-                        return port;
-                    }
+                    return port;
                 }
             }
             return null;
@@ -123,12 +133,13 @@ namespace VNode
 
         private Node GetNodeIfPointerInside()
         {
-            foreach(Node node in nodeCollector.nodes)
+            foreach(Node node in NodeRegistry.Nodes.Values)
             {
-                if(node.nodeTransform.IsPointerInside(mousePositionInCanvas))   
+               if(node.nodeTransform.Rect.Contains(mousePosition))
+               {
                     return node;
+               }
             }
-
             return null;
         }
     }

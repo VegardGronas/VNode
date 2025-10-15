@@ -16,12 +16,12 @@ namespace VNode
                     if (selectedNode != null)
                     {
                         if (selectedNode is StartNode) break;
-                        nodeCollector.DeleteNode(selectedNode);
+                        nodeManager.DeleteNode(selectedNode);
                     }
                     selectedNode = null;
                     break;
                 case NodeInputManager.InputType.ContextClick:
-                    contextMenu.OpenContextMenu(mousePosition, nodeCollector);
+                    contextMenu.OpenContextMenu(mousePosition, nodeManager);
                     break;
             }
         }
