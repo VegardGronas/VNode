@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace VNode
 {
+    [System.Serializable]
     public class NodeTransform
     {
         public Vector2 Position { get; set; } // top-left of node in canvas space
@@ -10,7 +11,7 @@ namespace VNode
         public Vector2 PositionLocal => Position; // for now same as canvas
         public Vector2 PositionCanvas { get; set; } // can add parent offsets later
 
-        public Rect Rect => new Rect(Position, Size);
+        public Rect Rect => new(Position, Size);
 
         public NodeTransform(Vector2 position, Vector2 size)
         {
@@ -27,7 +28,7 @@ namespace VNode
         public bool IsPointerInside(Vector2 mousePos)
         {
             // Define the node rectangle in canvas space
-            Rect nodeRect = new Rect(PositionCanvas, Size);
+            Rect nodeRect = new(PositionCanvas, Size);
 
             // Return true if the mouse is inside this rectangle
             return nodeRect.Contains(mousePos);

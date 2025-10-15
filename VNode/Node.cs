@@ -6,6 +6,21 @@ using UnityEngine;
 
 namespace VNode
 {
+    [Serializable]
+    public class NodeData
+    {
+        public string ID { get; }
+        public NodeTransform NodeTransform { get; }
+        public Type NodeType { get; }
+
+        public NodeData(string id, NodeTransform nodeTransform, Type nodeType)
+        {
+            ID = id;
+            NodeTransform = nodeTransform;
+            NodeType = nodeType;
+        }
+    }
+
     public class Node : MonoBehaviour
     {
         public string ID { get; } = Guid.NewGuid().ToString();
@@ -26,7 +41,6 @@ namespace VNode
 
         public void TriggerNext(NodePort port, HashSet<Node> visited = null)
         {
-
         }
 
         public virtual void NewPortConnection(NodePort port) { }
